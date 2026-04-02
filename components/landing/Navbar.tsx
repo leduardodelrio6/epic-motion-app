@@ -1,0 +1,143 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, Sun, Moon } from 'lucide-react';
+
+const links = [
+  { label: 'INICIO', href: '#inicio' },
+  { label: 'ESTILOS', href: '#estilos' },
+  { label: 'NOSOTROS', href: '#nosotros' },
+  { label: 'GALERÍA', href: '#galeria' },
+];
+
+export default function Navbar() {
+  const [visible, setVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+
+  // Ocultar/mostrar navbar en scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setVisible(currentY < lastScrollY || currentY < 60);
+      setLastScrollY(currentY);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // Toggle dark/light mode en <html>
+  const toggleTheme = () => {
+    const html = document.documentElement;
+    if (isDark) {
+      html.classList.remove('dark');
+      html.classList.add('light');
+    } else {
+      html.classList.remove('light');
+      html.classList.add('dark');
+    }
+    setIsDark(!isDark);
+  };
+
+  const handleLinkClick = () => setMenuOpen(false);
+
+  return (
+    <>
+      <motion.header
+        animate={{ y: visible ? 0 : -100 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="fixed top-0 left-0 right-0 z-50 bg-epic-black/90 dark:bg-epic-black/90 light:bg-white/90 backdrop-blur-md border-b border-white/5"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <a href="#inicio" className="flex items-center">
+            <Image
+              src={isDark ? '/logo.png' : '/logo-light.png'}
+              alt="Epic Motion"
+              width={120}
+              height={40}
+              className="h-9 w-auto object-contain"
+              priority
+            />
+          </a>
+
+          {/* Links desktop */}
+          <nav className="hidden md:flex items-center gap-8">
+            {links.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="font-montserrat text-xs font-700 tracking-widest text-epic-silver hover:text-epic-gold transition-colors duration-200"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
+          {/* Acciones */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              aria-label="Cambiar tema"
+              className="p-2 rounded-full text-epic-silver hover:text-epic-gold hover:bg-white/5 transition-colors"
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
+            <a
+              href="/login"
+              className="hidden md:inline-flex items-center font-montserrat text-xs font-700 tracking-widest px-5 py-2 border border-epic-gold text-epic-gold hover:bg-epic-gold hover:text-epic-black transition-colors duration-200"
+            >
+              ACCEDER
+            </a>
+
+            {/* Hamburguesa mobile */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Menú"
+              className="md:hidden p-2 text-epic-silver hover:text-epic-gold transition-colors"
+            >
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Menú mobile */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-16 left-0 right-0 z-40 bg-epic-black border-b border-white/10 md:hidden"
+          >
+            <nav className="flex flex-col px-4 py-4 gap-1">
+              {links.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={handleLinkClick}
+                  className="font-montserrat text-sm font-700 tracking-widest text-epic-silver hover:text-epic-gold py-3 border-b border-white/5 transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+              <a
+                href="/login"
+                onClick={handleLinkClick}
+                className="mt-3 text-center font-montserrat text-sm font-700 tracking-widest px-5 py-3 border border-epic-gold text-epic-gold hover:bg-epic-gold hover:text-epic-black transition-colors"
+              >
+                ACCEDER
+              </a>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
