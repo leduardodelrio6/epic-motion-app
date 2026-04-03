@@ -2,8 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Variables base — dark mode (default) */
-:root {
+/* Variables CSS — dark mode (default, clase .dark en <html>) */
+:root,
+.dark {
   --background: #0A0A0A;
   --foreground: #FFFFFF;
   --surface: #2A2A2A;
@@ -13,7 +14,7 @@
   --overlay: rgba(10, 10, 10, 0.7);
 }
 
-/* Variables light mode */
+/* Variables CSS — light mode (clase .light en <html>, sin .dark) */
 .light {
   --background: #FFFFFF;
   --foreground: #0A0A0A;

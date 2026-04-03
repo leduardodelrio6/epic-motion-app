@@ -22,10 +22,10 @@ function EstiloCard({ imagen, titulo, subtitulo, descripcion, index }: EstiloCar
       initial={{ opacity: 0, y: 50 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay: index * 0.15, ease: 'easeOut' }}
-      className="group relative overflow-hidden"
+      className="group flex flex-col"
     >
-      {/* Imagen */}
-      <div className="relative aspect-[3/4] overflow-hidden">
+      {/* Imagen cuadrada */}
+      <div className="relative aspect-square overflow-hidden">
         <Image
           src={imagen}
           alt={titulo}
@@ -33,21 +33,20 @@ function EstiloCard({ imagen, titulo, subtitulo, descripcion, index }: EstiloCar
           className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, 33vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-epic-black via-epic-black/20 to-transparent" />
       </div>
 
-      {/* Contenido sobre la imagen */}
-      <div className="absolute bottom-0 left-0 right-0 p-6">
+      {/* Texto debajo de la imagen */}
+      <div className="pt-5 pb-2 flex flex-col gap-2">
         {subtitulo && (
-          <p className="font-montserrat font-light text-xs tracking-[0.3em] text-epic-gold uppercase mb-1">
+          <p className="font-montserrat font-light text-xs tracking-[0.3em] text-epic-gold uppercase">
             {subtitulo}
           </p>
         )}
-        <h3 className="font-montserrat font-bold text-2xl tracking-widest text-white uppercase mb-3">
+        <h3 className="font-montserrat font-bold text-xl tracking-widest uppercase text-epic-black dark:text-white">
           {titulo}
         </h3>
-        <div className="w-8 h-px bg-epic-gold mb-3" />
-        <p className="font-inter text-sm text-epic-silver leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-h-0 group-hover:max-h-24 overflow-hidden transition-all">
+        <div className="w-8 h-px bg-epic-gold" />
+        <p className="font-inter text-sm text-gray-600 dark:text-epic-silver leading-relaxed mt-1">
           {descripcion}
         </p>
       </div>
@@ -80,29 +79,29 @@ export default function EstilosGrid() {
   ];
 
   return (
-    <section id="estilos" className="py-24 px-4 bg-epic-gray/20">
+    <section id="estilos" className="py-24 px-4 bg-white dark:bg-epic-black">
       <div className="max-w-6xl mx-auto">
-        {/* Título */}
+        {/* Título — alineado izquierda */}
         <motion.div
           ref={titleRef}
           initial={{ opacity: 0, y: 30 }}
           animate={titleInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="text-center mb-16"
+          className="mb-12"
         >
           <h2 className="font-montserrat leading-tight">
-            <span className="block font-bold text-epic-gold text-[clamp(1.5rem,4vw,2.5rem)] tracking-widest uppercase">
+            <span className="block font-bold text-epic-black dark:text-white text-[clamp(1.5rem,4vw,2.5rem)] tracking-widest uppercase">
               Tres disciplinas,
             </span>
-            <span className="block font-light text-white text-[clamp(1.5rem,4vw,2.5rem)] tracking-widest uppercase">
+            <span className="block font-light text-gray-500 dark:text-epic-silver text-[clamp(1.5rem,4vw,2.5rem)] tracking-widest uppercase">
               un mismo espíritu
             </span>
           </h2>
-          <div className="w-16 h-px bg-epic-gold mx-auto mt-6" />
+          <div className="w-16 h-px bg-epic-gold mt-6" />
         </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
           {estilos.map((e, i) => (
             <EstiloCard key={e.titulo} {...e} index={i} />
           ))}

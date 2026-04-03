@@ -1,7 +1,8 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
+
 function InstagramIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
@@ -49,16 +50,10 @@ const redes = [
 export default function CTASection() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
+  const [btnHovered, setBtnHovered] = useState(false);
 
   return (
-    <section id="galeria" className="relative py-32 px-4 overflow-hidden bg-epic-gray">
-      {/* Fondo decorativo */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-epic-gold" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-epic-gold" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full border border-epic-gold" />
-      </div>
-
+    <section className="relative py-32 px-4 overflow-hidden bg-white dark:bg-epic-gray border-t-2 border-epic-gold">
       <div ref={ref} className="relative max-w-3xl mx-auto text-center">
         {/* Título */}
         <motion.div
@@ -68,14 +63,13 @@ export default function CTASection() {
           className="mb-8"
         >
           <h2 className="font-montserrat leading-tight">
-            <span className="block font-bold text-epic-gold text-[clamp(1.5rem,4vw,2.5rem)] tracking-widest uppercase">
+            <span className="block font-bold text-epic-black dark:text-white text-[clamp(1.5rem,4vw,2.5rem)] tracking-widest uppercase">
               ¿Listo para
             </span>
-            <span className="block font-light text-white text-[clamp(1.5rem,4vw,2.5rem)] tracking-widest uppercase">
+            <span className="block font-light text-gray-500 dark:text-epic-silver text-[clamp(1.5rem,4vw,2.5rem)] tracking-widest uppercase">
               el primer paso?
             </span>
           </h2>
-          <div className="w-16 h-px bg-epic-gold mx-auto mt-6" />
         </motion.div>
 
         {/* Texto */}
@@ -83,26 +77,49 @@ export default function CTASection() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.15 }}
-          className="font-inter text-epic-silver text-sm leading-relaxed mb-10 max-w-xl mx-auto"
+          className="font-inter text-gray-600 dark:text-epic-silver text-sm leading-relaxed mb-10 max-w-xl mx-auto"
         >
           Agenda una clase de prueba gratuita y descubre por qué Epic Motion es el lugar donde los grandes bailarines comienzan. Sin compromiso, solo danza.
         </motion.p>
 
-        {/* Botón principal */}
+        {/* Botón principal — negro en light, dorado en dark */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mb-14"
         >
-          <a
+          <motion.a
             href="https://wa.me/528712044277?text=Hola%20Epic%20Motion%2C%20quiero%20agendar%20una%20clase%20de%20prueba%20gratuita"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center font-montserrat font-bold text-sm tracking-[0.2em] px-10 py-5 bg-epic-gold text-epic-black hover:bg-white hover:text-epic-black transition-colors duration-300 uppercase"
+            onHoverStart={() => setBtnHovered(true)}
+            onHoverEnd={() => setBtnHovered(false)}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            className="group relative inline-flex items-center overflow-hidden font-montserrat font-bold text-sm tracking-[0.2em] px-10 py-5 uppercase"
           >
-            Clase de Prueba Gratuita
-          </a>
+            {/* Fondo base */}
+            <span className="absolute inset-0 bg-epic-black dark:bg-epic-gold" />
+
+            {/* Fill inverso que barre al hacer hover — blanco en dark, dorado en light */}
+            <motion.span
+              className="absolute inset-0 bg-white dark:bg-epic-black origin-left"
+              animate={{ scaleX: btnHovered ? 1 : 0 }}
+              transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}
+            />
+
+            {/* Texto + flecha */}
+            <span className="relative z-10 flex items-center gap-3 text-white dark:text-epic-black group-hover:text-epic-black dark:group-hover:text-epic-gold transition-colors duration-300">
+              Clase de Prueba Gratuita
+              <motion.span
+                animate={{ x: btnHovered ? 5 : 0, opacity: btnHovered ? 1 : 0.5 }}
+                transition={{ duration: 0.3 }}
+              >
+                →
+              </motion.span>
+            </span>
+          </motion.a>
         </motion.div>
 
         {/* Divisor */}
@@ -110,7 +127,7 @@ export default function CTASection() {
           initial={{ scaleX: 0 }}
           animate={inView ? { scaleX: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.45 }}
-          className="w-full h-px bg-white/10 mb-10 origin-center"
+          className="w-full h-px bg-gray-200 dark:bg-white/10 mb-10 origin-center"
         />
 
         {/* Redes sociales */}
@@ -126,7 +143,7 @@ export default function CTASection() {
               href={red.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-epic-silver hover:text-epic-gold transition-colors duration-200 group"
+              className="flex items-center gap-2 text-gray-500 dark:text-epic-silver hover:text-epic-gold dark:hover:text-epic-gold transition-colors duration-200 group"
             >
               <span className="group-hover:scale-110 transition-transform inline-flex">
                 <red.icon size={18} />
