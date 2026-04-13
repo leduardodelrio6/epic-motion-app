@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.git/
+*.lock
+package-lock.json
+public/images/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.svg
+*.ico
+prisma/dev.db
+dist/
+.vercel/
