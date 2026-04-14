@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"
@@ -10,4 +8,359 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum Rol {
+  ADMIN
+  MAESTRO
+  PADRE
+  RECEPCIONISTA
+}
+
+enum EstatusAlumna {
+  ACTIVA
+  INACTIVA
+  PRUEBA
+}
+
+enum EstiloClase {
+  BALLET
+  HIPHOP
+  TAP
+  JAZZ
+  ACRO
+}
+
+enum EstadoSesion {
+  PROGRAMADA
+  INICIADA
+  COMPLETADA
+  NO_INICIADA
+}
+
+enum EstadoAsistencia {
+  PRESENTE
+  TARDE
+  AUSENTE
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+  VENCIDO
+}
+
+enum TipoPago {
+  MENSUALIDAD
+  CLASE_PRIVADA
+  INSCRIPCION
+  OTRO
+}
+
+enum TipoEvento {
+  RECITAL
+  COMPETENCIA_INTERNA
+  COMPETENCIA_EXTERNA
+  SHOWCASE
+  ENSAYO
+}
+
+enum TipoNota {
+  RUTINARIA
+  EXTRAORDINARIA
+}
+
+enum EstadoNota {
+  BORRADOR
+  APROBADA
+  PUBLICADA
+}
+
+enum EstadoClasePrivada {
+  AGENDADA
+  PAGADA
+  COMPLETADA
+  CANCELADA
+}
+
+// ─────────────────────────────────────────────
+// Modelos
+// ─────────────────────────────────────────────
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  apellido  String
+  telefono  String?
+  rol       Rol
+  avatar    String?
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  alumnas         Alumna[]         @relation("PadreAlumnas")
+  profesor        Profesor?
+  noticiasAutor   Noticia[]        @relation("AutorNoticias")
+  notificaciones  Notificacion[]
+  lecturasNoticias LecturaNoticia[] @relation("PadreLectura")
+  pagosComoPadre  Pago[]           @relation("PadrePagos")
+  sesionesComoProfesor Sesion[]    @relation("ProfesorSesiones")
+  clasesComoProfesors Clase[]      @relation("ProfesorClases")
+  notasComoMaestro Nota[]         @relation("MaestroNotas")
+}
+
+model Alumna {
+  id              String        @id @default(cuid())
+  nombre          String
+  apellido        String
+  fechaNacimiento DateTime
+  foto            String?
+  estatus         EstatusAlumna @default(ACTIVA)
+  fechaInscripcion DateTime     @default(now())
+
+  // Relación con padre
+  padreId String
+  padre   Usuario @relation("PadreAlumnas", fields: [padreId], references: [id])
+
+  // Relaciones
+  clases         AlumnaClase[]
+  asistencias    Asistencia[]
+  pagos          Pago[]
+  notas          Nota[]
+  logros         Logro[]
+  clasesPrivadas ClasePrivada[]
+}
+
+model Salon {
+  id          String  @id @default(cuid())
+  nombre      String
+  descripcion String?
+  capacidad   Int
+
+  // Relaciones
+  clases Clase[]
+}
+
+model Clase {
+  id       String      @id @default(cuid())
+  nombre   String
+  estilo   EstiloClase
+  nivel    String?
+  duracion Int         // minutos
+  dias     String[]
+  horario  String
+  cupo     Int
+
+  // Relaciones con Salon y Profesor
+  salonId    String
+  salon      Salon   @relation(fields: [salonId], references: [id])
+  profesorId String
+  profesor   Usuario @relation("ProfesorClases", fields: [profesorId], references: [id])
+
+  // Relaciones
+  alumnas  AlumnaClase[]
+  sesiones Sesion[]
+  eventos  EventoGrupo[]
+}
+
+model AlumnaClase {
+  id               String   @id @default(cuid())
+  fechaInscripcion DateTime @default(now())
+
+  alumnaId String
+  alumna   Alumna @relation(fields: [alumnaId], references: [id])
+  claseId  String
+  clase    Clase  @relation(fields: [claseId], references: [id])
+
+  @@unique([alumnaId, claseId])
+}
+
+model Sesion {
+  id         String       @id @default(cuid())
+  fecha      DateTime
+  horaInicio DateTime
+  horaFin    DateTime
+  estado     EstadoSesion @default(PROGRAMADA)
+  checkinAt  DateTime?
+
+  claseId    String
+  clase      Clase   @relation(fields: [claseId], references: [id])
+  profesorId String
+  profesor   Usuario @relation("ProfesorSesiones", fields: [profesorId], references: [id])
+
+  // Relaciones
+  asistencias Asistencia[]
+}
+
+model Asistencia {
+  id             String           @id @default(cuid())
+  estado         EstadoAsistencia
+  uniforme       Boolean          @default(true)
+  uniformeMotivo String[]         // zapato, tocado, tutu
+  createdAt      DateTime         @default(now())
+
+  sesionId String
+  sesion   Sesion @relation(fields: [sesionId], references: [id])
+  alumnaId String
+  alumna   Alumna @relation(fields: [alumnaId], references: [id])
+
+  @@unique([sesionId, alumnaId])
+}
+
+model Pago {
+  id               String     @id @default(cuid())
+  importe          Float
+  concepto         String
+  fechaVencimiento DateTime
+  fechaPago        DateTime?
+  estado           EstadoPago @default(PENDIENTE)
+  comprobanteUrl   String?
+  tipo             TipoPago
+
+  alumnaId String
+  alumna   Alumna  @relation(fields: [alumnaId], references: [id])
+  padreId  String
+  padre    Usuario @relation("PadrePagos", fields: [padreId], references: [id])
+
+  // Relaciones
+  clasesPrivadas ClasePrivada[] @relation("PrepagoClasePrivada")
+}
+
+model Profesor {
+  id             String   @id @default(cuid())
+  tarifaHora     Float
+  especialidades String[]
+
+  usuarioId      String  @unique
+  usuario        Usuario @relation(fields: [usuarioId], references: [id])
+
+  // Relaciones
+  clasesPrivadas ClasePrivada[]
+}
+
+model Evento {
+  id          String     @id @default(cuid())
+  tipo        TipoEvento
+  titulo      String
+  descripcion String?
+  fecha       DateTime
+  ubicacion   String?
+  cupo        Int?
+  activo      Boolean    @default(true)
+
+  // Relaciones
+  grupos EventoGrupo[]
+}
+
+model EventoGrupo {
+  eventoId String
+  evento   Evento @relation(fields: [eventoId], references: [id])
+  claseId  String
+  clase    Clase  @relation(fields: [claseId], references: [id])
+
+  @@id([eventoId, claseId])
+}
+
+model Noticia {
+  id        String   @id @default(cuid())
+  titulo    String
+  cuerpo    String
+  imagenUrl String?
+  fecha     DateTime @default(now())
+  activa    Boolean  @default(true)
+
+  autorId String
+  autor   Usuario @relation("AutorNoticias", fields: [autorId], references: [id])
+
+  // Relaciones
+  lecturas LecturaNoticia[]
+}
+
+model LecturaNoticia {
+  id           String   @id @default(cuid())
+  fechaLectura DateTime @default(now())
+
+  noticiaId String
+  noticia   Noticia @relation(fields: [noticiaId], references: [id])
+  padreId   String
+  padre     Usuario @relation("PadreLectura", fields: [padreId], references: [id])
+
+  @@unique([noticiaId, padreId])
+}
+
+model Nota {
+  id          String     @id @default(cuid())
+  tipo        TipoNota
+  contenido   String
+  estado      EstadoNota @default(BORRADOR)
+  fecha       DateTime   @default(now())
+  aprobadaPor String?
+
+  alumnaId  String
+  alumna    Alumna  @relation(fields: [alumnaId], references: [id])
+  maestroId String
+  maestro   Usuario @relation("MaestroNotas", fields: [maestroId], references: [id])
+}
+
+model Logro {
+  id               String   @id @default(cuid())
+  tipo             String
+  nombre           String
+  descripcion      String
+  icono            String?
+  puntos           Int
+  fechaDesbloqueo  DateTime @default(now())
+
+  alumnaId String
+  alumna   Alumna @relation(fields: [alumnaId], references: [id])
+}
+
+model Notificacion {
+  id     String   @id @default(cuid())
+  tipo   String
+  titulo String
+  cuerpo String?
+  leida  Boolean  @default(false)
+  fecha  DateTime @default(now())
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+}
+
+model Paquete {
+  id               String   @id @default(cuid())
+  nombre           String
+  clasesPorSemana  Int
+  precio           Float
+  estilosIncluidos String[]
+  activo           Boolean  @default(true)
+}
+
+model ClasePrivada {
+  id       String             @id @default(cuid())
+  fecha    DateTime
+  hora     String
+  duracion Int                @default(60)
+  estado   EstadoClasePrivada @default(AGENDADA)
+
+  alumnaId   String
+  alumna     Alumna  @relation(fields: [alumnaId], references: [id])
+  profesorId String
+  profesor   Profesor @relation(fields: [profesorId], references: [id])
+  prepagoId  String?
+  prepago    Pago?   @relation("PrepagoClasePrivada", fields: [prepagoId], references: [id])
+}
+
+model Configuracion {
+  id          String  @id @default(cuid())
+  clave       String  @unique
+  valor       String
+  descripcion String?
 }
