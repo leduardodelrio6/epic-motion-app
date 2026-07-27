@@ -87,6 +87,13 @@ enum EstadoClasePrivada {
   CANCELADA
 }
 
+enum TipoClase {
+  GRUPAL
+  PRIVADA
+  ENSAYO
+  EVENTO
+}
+
 // ─────────────────────────────────────────────
 // Modelos
 // ─────────────────────────────────────────────
@@ -235,7 +242,6 @@ model Pago {
 
 model Profesor {
   id             String   @id @default(cuid())
-  tarifaHora     Float
   especialidades String[]
 
   usuarioId      String  @unique
@@ -243,6 +249,18 @@ model Profesor {
 
   // Relaciones
   clasesPrivadas ClasePrivada[]
+  tarifas        TarifaProfesor[]
+}
+
+model TarifaProfesor {
+  id        String    @id @default(cuid())
+  tipoClase TipoClase
+  tarifa    Float
+
+  profesorId String
+  profesor   Profesor @relation(fields: [profesorId], references: [id])
+
+  @@unique([profesorId, tipoClase])
 }
 
 model Evento {

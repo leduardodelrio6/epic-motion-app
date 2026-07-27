@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { PrismaClient, Rol, EstatusAlumna, EstiloClase } from "../app/generated/prisma/client";
+import { PrismaClient, Rol, EstatusAlumna, EstiloClase, TipoClase } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 
@@ -94,7 +94,6 @@ async function main() {
     update: {},
     create: {
       usuarioId: carolina.id,
-      tarifaHora: 250,
       especialidades: ["BALLET", "TAP", "JAZZ"],
     },
   });
@@ -104,12 +103,39 @@ async function main() {
     update: {},
     create: {
       usuarioId: roberto.id,
-      tarifaHora: 280,
       especialidades: ["HIPHOP", "ACRO"],
     },
   });
 
   console.log("✅ Profesores creados");
+
+  // ─────────────────────────────────────────────
+  // Tarifas por tipo de clase
+  // ─────────────────────────────────────────────
+
+  const tarifasPorProfesor = [
+    { profesorId: profesorCarolina.id, tipoClase: TipoClase.GRUPAL, tarifa: 250 },
+    { profesorId: profesorCarolina.id, tipoClase: TipoClase.PRIVADA, tarifa: 350 },
+    { profesorId: profesorCarolina.id, tipoClase: TipoClase.ENSAYO, tarifa: 200 },
+    { profesorId: profesorRoberto.id, tipoClase: TipoClase.GRUPAL, tarifa: 280 },
+    { profesorId: profesorRoberto.id, tipoClase: TipoClase.PRIVADA, tarifa: 380 },
+    { profesorId: profesorRoberto.id, tipoClase: TipoClase.EVENTO, tarifa: 400 },
+  ];
+
+  for (const tarifa of tarifasPorProfesor) {
+    await prisma.tarifaProfesor.upsert({
+      where: {
+        profesorId_tipoClase: {
+          profesorId: tarifa.profesorId,
+          tipoClase: tarifa.tipoClase,
+        },
+      },
+      update: { tarifa: tarifa.tarifa },
+      create: tarifa,
+    });
+  }
+
+  console.log("✅ Tarifas por tipo de clase creadas");
 
   // ─────────────────────────────────────────────
   // Salones

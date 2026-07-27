@@ -369,7 +369,8 @@ Clase (grupo)   — id, nombre, estilo, nivel, duración, días, horario, cupo, 
 Sesión          — id, clase_id, fecha, hora_inicio, hora_fin, profesor_id, estado
 Asistencia      — id, sesión_id, alumna_id, status, uniforme, uniforme_motivo
 Pago            — id, alumna_id, padre_id, importe, fecha_vencimiento, estado, comprobante_url
-Profesor        — id, usuario_id, tarifa_hora, disponibilidad_privadas
+Profesor        — id, usuario_id, especialidades, disponibilidad_privadas
+TarifaProfesor  — id, profesor_id, tipo_clase (grupal/privada/ensayo/evento), tarifa
 Evento          — id, tipo, título, descripción, fecha, ubicación, cupo
 Noticia         — id, título, cuerpo, imagen_url, fecha, lecturas_confirmadas
 Nota            — id, alumna_id, maestro_id, tipo, contenido, estado (borrador/aprobada/publicada)
